@@ -5,7 +5,14 @@ const express = require("express");
 const app = express();
 
 const cors = require("cors");
-app.use(cors());
+
+app.use(cors({
+    origin: [
+        "http://localhost:5173",
+        "https://shopify-ddf693qtg-ravi-tomars-projects-80045fd2.vercel.app"
+    ],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
