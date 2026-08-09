@@ -10,7 +10,8 @@ const cors = require("cors");
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://shopify-alpha-eosin.vercel.app"
+        "https://shopify-alpha-eosin.vercel.app",
+        "https://shopify-alpha-eosin.vercel.app/"
     ],
     credentials: true
 }));
