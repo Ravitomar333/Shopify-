@@ -6,7 +6,7 @@ const sendEmail = require('../utils/sendEmail');
 
 const createOrder = async (req,res) =>{
     try{
-        const { items, products, totalAmount, address, paymentId } = req.body;
+        const { items, products, totalAmount, address, paymentId, paymentMethod = 'razorpay' } = req.body;
         const normalizedItems = Array.isArray(items)
             ? items
             : Array.isArray(products)
@@ -27,18 +27,24 @@ const createOrder = async (req,res) =>{
             return res.status(400).json({message: 'Invalid Order Data'});
         }
 
+        if (!['razorpay', 'cod'].includes(paymentMethod)) {
+            return res.status(400).json({message: 'Invalid payment method'});
+        }
+
         const order = new Order({
             user: req.user._id,
             products: orderItems,
             totalAmount,
             address,
             paymentId,
+            paymentMethod,
         });
         await order.save();
         const message = `Dear ${req.user.name},\n\n
             Thank You for your order! , Your Order has been created successfully created with details : \n\n OrderID: ${order._id}\n Total Amount: $${totalAmount} \n Shipping Address : ${address}\n\n we will notify you when order is shipped.\n\n Best regards,\n Shopify Team. `;
-        await sendEmail(req.user.email,'Order Created', message );
         res.status(201).json({message: 'Order created successfully', order});
+        sendEmail(req.user.email,'Order Created', message)
+            .catch((error) => console.error('Order email failed:', error));
      }
      catch (error){
         res.status(500).json({message : 'Error creating order', error});

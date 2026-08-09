@@ -15,6 +15,8 @@ const Checkout = () => {
   const [address, setAddress] = useState({
     fullName: '', street: '', city: '', postalCode: '', country: ''
   });
+  const [paymentMethod, setPaymentMethod] = useState('razorpay');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
@@ -92,6 +94,30 @@ const Checkout = () => {
     }
   };
 
+  const placeCashOnDeliveryOrder = async () => {
+    const saveOrderRes = await fetch(`${API_URL}/api/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${user.token}`
+      },
+      body: JSON.stringify({
+        items: cartItems,
+        totalAmount: totalPrice,
+        address,
+        paymentMethod: 'cod'
+      })
+    });
+
+    if (!saveOrderRes.ok) {
+      const data = await saveOrderRes.json().catch(() => ({}));
+      throw new Error(data.message || 'Order placement failed');
+    }
+
+    dispatch(clearCart());
+    navigate('/ordersuccess', { replace: true, state: { paymentMethod: 'cod' } });
+  };
+
   const bypassPayment = async () => {
     const saveOrderRes = await fetch(`${API_URL}/api/orders`, {
       method: 'POST',
@@ -119,7 +145,17 @@ const Checkout = () => {
       navigate('/login');
       return;
     }
-    handlePayment();
+    setIsSubmitting(true);
+    const placeOrder = paymentMethod === 'cod'
+      ? placeCashOnDeliveryOrder
+      : handlePayment;
+
+    placeOrder()
+      .catch((error) => {
+        console.error(error);
+        alert(error.message || 'Unable to place the order. Please try again.');
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   return (
@@ -133,9 +169,34 @@ const Checkout = () => {
           <input type="text" placeholder="City" required value={address.city} onChange={(e) => setAddress({...address, city: e.target.value})} />
           <input type="text" placeholder="Postal Code" required value={address.postalCode} onChange={(e) => setAddress({...address, postalCode: e.target.value})} />
           <input type="text" placeholder="Country" required value={address.country} onChange={(e) => setAddress({...address, country: e.target.value})} />
+          <fieldset className="payment-methods">
+            <legend>Payment Method</legend>
+            <label>
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="razorpay"
+                checked={paymentMethod === 'razorpay'}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              />
+              Pay now with Razorpay
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="cod"
+                checked={paymentMethod === 'cod'}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              />
+              Cash on delivery
+            </label>
+          </fieldset>
           <div className="checkout-summary">
             <h4>Total to Pay: ₹{totalPrice.toFixed(2)}</h4>
-            <button type="submit" className="btn">Pay Now</button>
+            <button type="submit" className="btn" disabled={isSubmitting}>
+              {isSubmitting ? 'Placing order...' : paymentMethod === 'cod' ? 'Place COD order' : 'Pay Now'}
+            </button>
           </div>
         </form>
       </div>

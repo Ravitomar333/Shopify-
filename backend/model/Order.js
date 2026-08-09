@@ -17,6 +17,7 @@ const orderSchema = new mongoose.Schema({
 
     },
     paymentId : {type: String},
+    paymentMethod: {type: String, enum: ['razorpay', 'cod'], default: 'razorpay'},
     status: {type: String,enum:['pending', 'shipped','delivered'], default: 'pending'},
  }, {timestamps: true});
 

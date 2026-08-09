@@ -1,7 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const OrderSuccess = () => {
+  const { state } = useLocation();
+  const isCashOnDelivery = state?.paymentMethod === 'cod';
   const containerStyle = {
     maxWidth: '600px',
     margin: '50px auto',
@@ -15,9 +18,13 @@ const OrderSuccess = () => {
 
   return (
     <div style={containerStyle}>
-      <h2 style={{ fontSize: '2.5rem', marginBottom: '20px', color: '#10b981' }}>Payment Successful!</h2>
+      <h2 style={{ fontSize: '2.5rem', marginBottom: '20px', color: '#10b981' }}>
+        {isCashOnDelivery ? 'Order placed successfully!' : 'Payment successful!'}
+      </h2>
       <p style={{ color: '#a1a1aa', fontSize: '1.2rem', marginBottom: '40px' }}>
-        Thank you for your order. We have securely received your payment and will process your shipment shortly.
+        {isCashOnDelivery
+          ? 'Your cash-on-delivery order has been received. Please pay when your order arrives.'
+          : 'Thank you for your order. We have securely received your payment and will process your shipment shortly.'}
       </p>
       <Link to="/shop" className="btn">Continue Shopping</Link>
     </div>
