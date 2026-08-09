@@ -1,6 +1,5 @@
 const User = require("../model/User");
 const jwt = require('jsonwebtoken');
-const sendEmail = require("../utils/sendEmail");
 
 const bcrypt = require("bcryptjs");
 
@@ -15,25 +14,12 @@ const generateToken = (id)=>{
 const registerUser = async(req, res) => {
     const {name,email,password } = req.body;
     try{
-        const existingUser = await User.findOne({email});
-        if(existingUser){
-            return res.status(400).json({ message : "User already registered"});
-        }
-
-        //todo hash password,jwt token gen,otp send verify,welcome mail
-
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
 
         const user = await User.create({name,email,password: hashedPassword,});
         if(user){
-            const otp = Math.floor(100000 + Math.random() * 900000).toString();
-            const message = `  welcome to shofify ${name}
-            ! Thanks For Registring us,
-            Your OTP for Shopify Registration is :${otp}`;
-
-            await sendEmail(email, `Welcome to Shopify - Your OTP for Registration `, message);
             res.status(201).json({
                 _id: user.id,
                 name:user.name,
@@ -47,6 +33,9 @@ const registerUser = async(req, res) => {
         
     }
     catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ message: "User already registered" });
+        }
         res.status(500).json({
             message: error.message
         });

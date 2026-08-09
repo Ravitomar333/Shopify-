@@ -8,8 +8,8 @@ const User = require('./model/User');
 const Order = require('./model/Order');
 
 const users = [
-	{ name: 'Admin', email: 'admin@gmail.com', password: 'password123', role: 'admin', verified: true },
-	{ name: 'Ravi', email: 'ravi@gmail.com', password: 'password123', role: 'user', verified: true }
+	{ name: 'Admin', email: 'admin@gmail.com', password: 'password123', role: 'admin' },
+	{ name: 'Ravi', email: 'ravi@gmail.com', password: 'password123', role: 'user' }
 ];
 
 const products = [
