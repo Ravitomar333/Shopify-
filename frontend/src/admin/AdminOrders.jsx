@@ -45,7 +45,6 @@ const AdminOrders = () => {
               <th style={thStyle}>ORDER ID</th>
               <th style={thStyle}>USER</th>
               <th style={thStyle}>TOTAL</th>
-              <th style={thStyle}>PAYMENT</th>
               <th style={thStyle}>DATE</th>
               <th style={thStyle}>STATUS</th>
             </tr>
@@ -56,7 +55,6 @@ const AdminOrders = () => {
                 <td style={tdStyle}>{order._id.substring(0, 8)}...</td>
                 <td style={tdStyle}>{order.user?.name || 'Deleted User'}</td>
                 <td style={tdStyle}>₹{Number(order.totalAmount).toFixed(2)}</td>
-                <td style={tdStyle}>{order.paymentMethod === 'cod' ? 'Cash on delivery' : 'Razorpay'}</td>
                 <td style={tdStyle}>{new Date(order.createdAt || parseInt(order._id.substring(0, 8), 16) * 1000).toLocaleDateString()}</td>
                 <td style={tdStyle}>
                   <select 
